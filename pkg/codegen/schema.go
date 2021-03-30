@@ -253,26 +253,30 @@ func GenerateGoSchema(sref *openapi3.SchemaRef, path []string) (Schema, error) {
 			outSchema.Properties = arrayType.Properties
 		case "integer":
 			// We default to int if format doesn't ask for something else.
-			if f == "int64" {
+			switch f {
+			case "int64":
 				outSchema.GoType = "int64"
-			} else if f == "uint64" {
+			case "uint64":
 				outSchema.GoType = "uint64"
-			} else if f == "int32" {
+			case "int32":
 				outSchema.GoType = "int32"
-			} else if f == "uint32" {
+			case "uint32":
 				outSchema.GoType = "uint32"
-			} else if f == "" {
+			case "":
 				outSchema.GoType = "int"
-			} else {
+			case "duration":
+				outSchema.GoType = "time.Duration"
+			default:
 				return Schema{}, fmt.Errorf("invalid integer format: %s", f)
 			}
 		case "number":
 			// We default to float for "number"
-			if f == "double" {
+			switch f {
+			case "double":
 				outSchema.GoType = "float64"
-			} else if f == "float" || f == "" {
+			case "float", "":
 				outSchema.GoType = "float32"
-			} else {
+			default:
 				return Schema{}, fmt.Errorf("invalid number format: %s", f)
 			}
 		case "boolean":
