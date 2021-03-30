@@ -280,7 +280,7 @@ func GenerateTypeDefinitions(t *template.Template, swagger *openapi3.Swagger, op
 	}
 	allTypes := append(schemaTypes, paramTypes...)
 
-	responseTypes, err := GenerateTypesForResponses(t, swagger.Components.Responses)
+	responseTypes, err := GenerateTypesForResponses(swagger.Components.Responses)
 	if err != nil {
 		return "", errors.Wrap(err, "error generating Go types for component responses")
 	}
@@ -416,7 +416,7 @@ func GenerateTypesForParameters(t *template.Template, params map[string]*openapi
 
 // Generates type definitions for any custom types defined in the
 // components/responses section of the Swagger spec.
-func GenerateTypesForResponses(t *template.Template, responses openapi3.Responses) ([]TypeDefinition, error) {
+func GenerateTypesForResponses(responses openapi3.Responses) ([]TypeDefinition, error) {
 	var types []TypeDefinition
 
 	for _, responseName := range SortedResponsesKeys(responses) {
