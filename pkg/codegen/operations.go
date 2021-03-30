@@ -255,6 +255,8 @@ func (o *OperationDefinition) SummaryAsComment() string {
 	return strings.Join(parts, "\n")
 }
 
+const respRefPrefix = "#/components/responses/"
+
 // Produces a list of type definitions for a given Operation for the response
 // types which we know how to parse. These will be turned into fields on a
 // response object for automatic deserialization of responses in the generated
@@ -277,6 +279,12 @@ func (o *OperationDefinition) GetResponseTypeDefinitions() ([]TypeDefinition, er
 					responseSchema, err := GenerateGoSchema(contentType.Schema, []string{responseCode})
 					if err != nil {
 						return nil, errors.Wrap(err, fmt.Sprintf("Unable to determine Go type for %s.%s", o.OperationId, contentTypeName))
+					}
+
+					// the struct was already been generated in GenerateTypesForResponses
+					if strings.HasPrefix(responseRef.Ref, respRefPrefix) {
+						responseSchema.GoType = strings.TrimPrefix(
+							responseRef.Ref, respRefPrefix)
 					}
 
 					var typeName string
