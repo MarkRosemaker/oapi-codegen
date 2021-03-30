@@ -264,8 +264,8 @@ func (o *OperationDefinition) GetResponseTypeDefinitions() ([]TypeDefinition, er
 
 	responses := o.Spec.Responses
 	sortedResponsesKeys := SortedResponsesKeys(responses)
-	for _, responseName := range sortedResponsesKeys {
-		responseRef := responses[responseName]
+	for _, responseCode := range sortedResponsesKeys {
+		responseRef := responses[responseCode]
 
 		// We can only generate a type if we have a value:
 		if responseRef.Value != nil {
@@ -274,7 +274,7 @@ func (o *OperationDefinition) GetResponseTypeDefinitions() ([]TypeDefinition, er
 				contentType := responseRef.Value.Content[contentTypeName]
 				// We can only generate a type if we have a schema:
 				if contentType.Schema != nil {
-					responseSchema, err := GenerateGoSchema(contentType.Schema, []string{responseName})
+					responseSchema, err := GenerateGoSchema(contentType.Schema, []string{responseCode})
 					if err != nil {
 						return nil, errors.Wrap(err, fmt.Sprintf("Unable to determine Go type for %s.%s", o.OperationId, contentTypeName))
 					}
@@ -282,13 +282,13 @@ func (o *OperationDefinition) GetResponseTypeDefinitions() ([]TypeDefinition, er
 					var typeName string
 					switch {
 					case StringInArray(contentTypeName, contentTypesJSON):
-						typeName = fmt.Sprintf("JSON%s", ToCamelCase(responseName))
+						typeName = fmt.Sprintf("JSON%s", ToCamelCase(responseCode))
 					// YAML:
 					case StringInArray(contentTypeName, contentTypesYAML):
-						typeName = fmt.Sprintf("YAML%s", ToCamelCase(responseName))
+						typeName = fmt.Sprintf("YAML%s", ToCamelCase(responseCode))
 					// XML:
 					case StringInArray(contentTypeName, contentTypesXML):
-						typeName = fmt.Sprintf("XML%s", ToCamelCase(responseName))
+						typeName = fmt.Sprintf("XML%s", ToCamelCase(responseCode))
 					default:
 						continue
 					}
@@ -296,7 +296,7 @@ func (o *OperationDefinition) GetResponseTypeDefinitions() ([]TypeDefinition, er
 					td := TypeDefinition{
 						TypeName:     typeName,
 						Schema:       responseSchema,
-						ResponseName: responseName,
+						ResponseCode: responseCode,
 					}
 					if IsGoTypeReference(contentType.Schema.Ref) {
 						refType, err := RefPathToGoType(contentType.Schema.Ref)

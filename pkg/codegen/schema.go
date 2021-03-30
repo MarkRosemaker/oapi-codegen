@@ -86,7 +86,7 @@ type Constants struct {
 type TypeDefinition struct {
 	TypeName     string
 	JsonName     string
-	ResponseName string
+	ResponseCode string
 	Schema       Schema
 }
 
