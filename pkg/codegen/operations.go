@@ -396,7 +396,6 @@ func OperationDefinitions(swagger *openapi3.Swagger) ([]OperationDefinition, err
 					return nil, fmt.Errorf("error generating default OperationID for %s/%s: %s",
 						opName, requestPath, err)
 				}
-				op.OperationID = op.OperationID
 			} else {
 				op.OperationID = ToCamelCase(op.OperationID)
 			}
