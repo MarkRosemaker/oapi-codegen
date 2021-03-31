@@ -25,11 +25,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-var pathParamRE *regexp.Regexp
-
-func init() {
-	pathParamRE = regexp.MustCompile("{[.;?]?([^{}*]+)\\*?}")
-}
+var pathParamRE *regexp.Regexp = regexp.MustCompile("{[.;?]?([^{}*]+)\\*?}")
 
 // Uppercase the first character in a string. This assumes UTF-8, so we have
 // to be careful with unicode, don't treat it as a byte array.
