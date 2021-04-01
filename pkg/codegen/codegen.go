@@ -433,6 +433,10 @@ func GenerateTypesForResponses(responses openapi3.Responses) ([]TypeDefinition, 
 				return nil, errors.Wrap(err, fmt.Sprintf("error generating Go type for schema in response %s", responseName))
 			}
 
+			if response.Description != nil {
+				goType.Description = *response.Description
+			}
+
 			typeDef := TypeDefinition{
 				JsonName: responseName,
 				Schema:   goType,
