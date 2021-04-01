@@ -514,6 +514,10 @@ func SchemaNameToTypeName(name string) string {
 	if name != "" && unicode.IsDigit([]rune(name)[0]) {
 		name = "N" + name
 	}
+	if name == "Error" {
+		// don't take field name Error which we want to reserve for the Error() string function
+		name = "Err"
+	}
 	return name
 }
 
