@@ -15,7 +15,7 @@ type Schema struct {
 
 	ArrayType *Schema // The schema of array element
 
-	EnumValues map[string]string // Enum values
+	EnumValues map[string]interface{} // Enum values
 
 	Properties               []Property       // For an object, the fields with names
 	HasAdditionalProperties  bool             // Whether we support additional properties
@@ -240,6 +240,12 @@ func GenerateGoSchema(sref *openapi3.SchemaRef, path []string) (Schema, error) {
 	} else {
 		f := schema.Format
 
+		var err error
+		outSchema.EnumValues, err = SanitizeEnumValues(schema.Enum, schema.EnumNames)
+		if err != nil {
+			return Schema{}, fmt.Errorf("sanitizing enum values: %s", err)
+		}
+
 		switch t {
 		case "array":
 			// For arrays, we'll get the type of the Items and throw a
@@ -285,16 +291,12 @@ func GenerateGoSchema(sref *openapi3.SchemaRef, path []string) (Schema, error) {
 			}
 			outSchema.GoType = "bool"
 		case "string":
-			enumValues := make([]string, len(schema.Enum))
-			var ok bool
-			for i, enumValue := range schema.Enum {
-				enumValues[i], ok = enumValue.(string)
-				if !ok {
-					return Schema{}, fmt.Errorf("expected enum to contain strings, found a %T", enumValue)
+			for n, v := range outSchema.EnumValues {
+				if _, ok := v.(string); !ok {
+					return Schema{}, fmt.Errorf("expected enum to contain strings, found a %T", v)
 				}
+				outSchema.EnumValues[n] = fmt.Sprintf("%q", v)
 			}
-
-			outSchema.EnumValues = SanitizeEnumNames(enumValues)
 
 			// Special case string formats here.
 			switch f {
@@ -497,7 +499,7 @@ func paramToGoType(param *openapi3.Parameter, path []string) (Schema, error) {
 	// so we'll return the parameter as a string, not bothering to decode it.
 	if len(param.Content) > 1 {
 		return Schema{
-			GoType: "string",
+			GoType:      "string",
 			Description: param.Description,
 		}, nil
 	}
@@ -507,7 +509,7 @@ func paramToGoType(param *openapi3.Parameter, path []string) (Schema, error) {
 	if !found {
 		// If we don't have json, it's a string
 		return Schema{
-			GoType: "string",
+			GoType:      "string",
 			Description: param.Description,
 		}, nil
 	}

@@ -479,35 +479,42 @@ func SanitizeGoIdentity(str string) string {
 	return str
 }
 
-// SanitizeEnumNames fixes illegal chars in the enum names
+// SanitizeEnumValues fixes illegal chars in the enum names
 // and removes duplicates
-func SanitizeEnumNames(enumNames []string) map[string]string {
-	dupCheck := make(map[string]int, len(enumNames))
-	deDup := make([]string, 0, len(enumNames))
-
-	for _, n := range enumNames {
-		if _, dup := dupCheck[n]; !dup {
-			deDup = append(deDup, n)
+func SanitizeEnumValues(enumValues []interface{}, enumNames []string) (map[string]interface{}, error) {
+	if n := len(enumNames); n > 0 {
+		if len(enumValues) != n {
+			return nil, fmt.Errorf("length of enums and enumNames does not match")
 		}
-
-		dupCheck[n] = 0
+	} else {
+		enumNames = make([]string, len(enumValues))
+		for i, v := range enumValues {
+			enumNames[i] = fmt.Sprint(v)
+		}
 	}
 
-	dupCheck = make(map[string]int, len(deDup))
-	sanitizedDeDup := make(map[string]string, len(deDup))
+	enumMap := map[string]interface{}{}
+	for i, n := range enumNames {
+		if _, dup := enumMap[n]; !dup {
+			enumMap[n] = enumValues[i]
+		}
+	}
 
-	for _, n := range deDup {
+	dupCheck := make(map[string]int, len(enumMap))
+	sanitizedDeDup := make(map[string]interface{}, len(enumMap))
+
+	for n, v := range enumMap {
 		sanitized := SanitizeGoIdentity(n)
 
 		if _, dup := dupCheck[sanitized]; !dup {
-			sanitizedDeDup[sanitized] = n
-			dupCheck[sanitized]++
+			sanitizedDeDup[sanitized] = v
 		} else {
-			sanitizedDeDup[sanitized+strconv.Itoa(dupCheck[sanitized])] = n
+			sanitizedDeDup[sanitized+strconv.Itoa(dupCheck[sanitized])] = v
 		}
+		dupCheck[sanitized]++
 	}
 
-	return sanitizedDeDup
+	return sanitizedDeDup, nil
 }
 
 // Converts a Schema name to a valid Go type name. It converts to camel case, and makes sure the name is
