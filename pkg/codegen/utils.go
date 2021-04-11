@@ -79,6 +79,10 @@ func ToCamelCase(str string) string {
 			capNext = false
 		}
 	}
+
+	// make the linter happy
+	n = strings.ReplaceAll(n, "Api", "API")
+	n = strings.ReplaceAll(n, "Http", "HTTP")
 	return n
 }
 
@@ -181,7 +185,7 @@ func SortedRequestBodyKeys(dict map[string]*openapi3.RequestBodyRef) []string {
 
 func SortedSecurityRequirementKeys(sr openapi3.SecurityRequirement) []string {
 	keys := make([]string, len(sr))
-	i := 0;
+	i := 0
 	for key := range sr {
 		keys[i] = key
 		i++
