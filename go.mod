@@ -19,4 +19,6 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
+replace github.com/getkin/kin-openapi => ../../faetools/kin-openapi
+
 go 1.14
